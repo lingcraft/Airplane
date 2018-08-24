@@ -149,10 +149,12 @@ void GameScene::update(float data)
 	auto it_bullet = this->m_vBullets.begin();
 	auto it_item = this->m_vItems.begin();
 
+	//!!!各种状态判断!!!
+
 	//子弹移动
 	for (it_bullet = this->m_vBullets.begin(); it_bullet != this->m_vBullets.end();)
 	{
-		(*it_bullet)->setPositionY((*it_bullet)->getPositionY() + BULLETS_SPEED);
+		(*it_bullet)->setPositionY((*it_bullet)->getPositionY() + (*it_bullet)->getSpeed());
 		if ((*it_bullet)->getPositionY() - (*it_bullet)->getContentSize().height / 2 >= visSize.height)
 		{
 			this->removeChild((*it_bullet));
@@ -167,7 +169,7 @@ void GameScene::update(float data)
 	//敌机移动
 	for (it_enemy = m_vEnemies.begin(); it_enemy != m_vEnemies.end();)
 	{
-		(*it_enemy)->setPositionY((*it_enemy)->getPositionY() - (*it_enemy)->e_speed);
+		(*it_enemy)->setPositionY((*it_enemy)->getPositionY() - (*it_enemy)->getSpeed());
 		if ((*it_enemy)->getPositionY() + (*it_enemy)->getContentSize().height / 2 <= 0)
 		{
 			this->removeChild((*it_enemy));
@@ -199,13 +201,9 @@ void GameScene::update(float data)
 		bool isHit = false;
 		for (it_bullet = m_vBullets.begin(); it_bullet != m_vBullets.end();)
 		{
-			if (m_vEnemies.empty())
-			{
-				break;
-			}
 			if ((*it_bullet)->getBoundingBox().intersectsRect((*it_enemy)->getBoundingBox()))  //两者矩形框有重叠即为相碰
 			{
-				(*it_enemy)->e_hp -= (*it_bullet)->b_attack;
+				(*it_enemy)->loseHP((*it_bullet)->getATK());
 				this->removeChild((*it_bullet));
 				it_bullet = m_vBullets.erase(it_bullet);
 

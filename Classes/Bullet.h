@@ -18,8 +18,11 @@ public:
 	Bullet();
 	static Bullet* create(BulletType);
 	bool init(BulletType);
-	int b_attack;
+	int getATK();
+	float getSpeed();
 
 private:
 	BulletType b_type;
+	float b_speed;
+	int b_attack;
 };

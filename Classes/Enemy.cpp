@@ -132,3 +132,18 @@ bool Enemy::isDestroy()
 {
 	return e_hp <= 0;
 }
+
+int Enemy::getHP()
+{
+	return this->e_hp;
+}
+
+void Enemy::loseHP(int loss)
+{
+	this->e_hp -= loss;
+}
+
+float Enemy::getSpeed()
+{
+	return this->e_speed;
+}

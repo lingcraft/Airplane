@@ -31,7 +31,7 @@
 //ÑªÁ¿
 #define SMALL_ENEMY_HP				1
 #define MIDDLE_ENEMY_HP				10
-#define BIG_ENEMY_HP				30
+#define BIG_ENEMY_HP				40
 
 //×Óµ¯
 #define	BULLET1_ATTACK				1
