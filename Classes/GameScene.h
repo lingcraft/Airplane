@@ -15,6 +15,7 @@ public:
 	CREATE_FUNC(GameScene);
 	virtual bool init();
 	void update(float);
+	void pauseAndResume(Ref*);
 
 	void createBullet(float);
 	void createSmallEnemmy(float);

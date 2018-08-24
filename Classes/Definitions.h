@@ -15,6 +15,7 @@
 #define ENEMY_LAYER					2
 #define SCORE_LAYER					3
 #define ITEM_LAYER					4
+#define UI_LAYER					5
 
 //ตรทึ
 #define DESTROY_SAMLL_SCORE			10

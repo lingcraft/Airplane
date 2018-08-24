@@ -25,51 +25,61 @@ bool GameScene::init()
 {
 	if (!Layer::init()) { return false; }
 
-	//导入plist
+	//==导入plist==
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("shoot_background.plist");  
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("shoot.plist");
 
-	//创建精灵
-	//背景
+	//==创建精灵==
+	//背景相关
 	auto bg = Sprite::createWithSpriteFrameName("background.png"); 
 	auto bg_next = Sprite::createWithSpriteFrameName("background.png");
-	
+	//暂停菜单
+	auto pause_normal = Sprite::createWithSpriteFrameName("game_pause_nor.png");
+	auto pause_pressed = Sprite::createWithSpriteFrameName("game_pause_pressed.png");
+	auto menu_item_pause = MenuItemSprite::create(pause_normal, pause_pressed);
+	//继续菜单
+	auto resume_normal = Sprite::createWithSpriteFrameName("game_resume_nor.png");
+	auto resume_pressed = Sprite::createWithSpriteFrameName("game_resume_pressed.png");
+	auto menu_item_resume = MenuItemSprite::create(resume_normal, resume_pressed);
+	//切换菜单
+	auto menu_item_toggle = MenuItemToggle::createWithCallback(CC_CALLBACK_1(GameScene::pauseAndResume, this), menu_item_pause, menu_item_resume, nullptr);
 	//飞机
 	auto hero = Sprite::createWithSpriteFrameName("hero1.png");  
-
 	//计分标签
 	auto lbl_score = Label::createWithBMFont("num.fnt","0");
 	auto lbl_stable = LabelTTF::create("Score:", "Arial", 36);
 
-	//设置位置
-	//背景
+	//==位置设置==
+	//背景1
 	bg->setAnchorPoint(Point::ZERO);  //锚点
 	bg->setPosition(0, 0);
 	bg->getTexture()->setAliasTexParameters();  //抗锯齿
 	this->addChild(bg, BG_LAYER, BG_TAG);
-
+	//背景2
 	bg_next->setAnchorPoint(Point::ZERO);
 	bg_next->setPosition(0, visSize.height);
 	bg_next->getTexture()->setAliasTexParameters();
 	this->addChild(bg_next, BG_LAYER, BGNEXT_TAG);
-	
 	//飞机
 	hero->setPosition(visSize.width / 2, hero->getContentSize().height / 2);
 	this->addChild(hero, PLANE_LAYER, HERO_TAG);
-
 	//分数标签
 	lbl_score->setAnchorPoint(Point::ZERO);
 	lbl_score->setPosition(120, visSize.height - 63);
 	this->addChild(lbl_score, SCORE_LAYER, SCORE_TAG);
 	lbl_score->setColor(Color3B::BLACK);
-
 	//固定的“得分”标签
 	lbl_stable->setAnchorPoint(Point::ZERO);
 	lbl_stable->setPosition(10, visSize.height - 45);
 	this->addChild(lbl_stable,SCORE_LAYER, STABLE_LABEL_TAG);
 	lbl_stable->setColor(Color3B::BLACK);
-
-	
+	//切换标签
+	menu_item_toggle->setPosition(Point(visSize - menu_item_pause->getContentSize()));
+	auto menu = Menu::create();
+	menu->addChild(menu_item_toggle);
+	menu->setPosition(Point::ZERO);
+	this->addChild(menu, UI_LAYER);
+	//==hero动画==
 	auto animation = Animation::create();  //飞机动画
 	
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("hero1.png"));  //动画帧
@@ -82,11 +92,15 @@ bool GameScene::init()
 	auto animate = Animate::create(animation);  //动画对象->动作对象
 	hero->runAction(animate);
 	
+	//==控制==
 	auto listener = EventListenerTouchOneByOne::create();   //鼠标控制事件
 	
 	listener->onTouchBegan = [=](Touch* touch, Event*)
 	{
 		log("=====Began=====");
+		//游戏暂停状态就不处理
+		if (Director::getInstance()->isPaused()) { return false; }
+
 		auto touchPos = touch->getLocation();
 		bool isControl = hero->getBoundingBox().containsPoint(touchPos);
 		if (isControl)
@@ -116,6 +130,7 @@ bool GameScene::init()
 	
 	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, hero);
 
+	//==对象更新==
 	//子弹
 	schedule(schedule_selector(GameScene::createBullet), BULLET_INTERVAL_DELAY); 
 	//敌机
@@ -127,6 +142,19 @@ bool GameScene::init()
 	scheduleUpdate();  //updata图像
     
     return true;
+}
+
+void GameScene::pauseAndResume(Ref* ref)
+{
+	auto toggle = (MenuItemToggle*)ref;  //通过Toggle菜单项的SelectedIndex可以判断现在切换到第几项
+	if (toggle->getSelectedIndex() == 0)
+	{
+		Director::getInstance()->resume();
+	} 
+	else
+	{
+		Director::getInstance()->pause();
+	}
 }
 
 void GameScene::update(float data)
