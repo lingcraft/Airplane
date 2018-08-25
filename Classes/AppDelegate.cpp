@@ -1,6 +1,6 @@
 #include "AppDelegate.h"
-#include "HelloWorldScene.h"
 #include "GameScene.h"
+#include "WelcomeScene.h"
 
 USING_NS_CC;
 
@@ -27,6 +27,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//×ÊÔ´Â·¾¶
 	FileUtils::getInstance()->addSearchPath("ui"); 
 	FileUtils::getInstance()->addSearchPath("font");
+	FileUtils::getInstance()->addSearchPath("sound");
 
     // turn on display FPS
     director->setDisplayStats(false);
@@ -35,7 +36,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->setAnimationInterval(1.0 / 60);
 
     // create a scene. it's an autorelease object
-	auto scene = GameScene::createScene();
+	auto scene = WelcomeScene::createScene();
 
     // run
     director->runWithScene(scene);

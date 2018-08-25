@@ -1,10 +1,6 @@
 #pragma once
 
-#include "cocos2d.h"
 #include "Definitions.h"
-
-USING_NS_CC;
-using namespace std;
 
 enum BulletType
 {

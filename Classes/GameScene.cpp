@@ -6,6 +6,8 @@ GameScene::GameScene()
 	m_isDoubleBullet = false;
 	m_doubleBulletNumber = 0;
 	m_bombCount = 0;
+	m_canMove = true;
+	m_planeActive = true;
 }
 
 GameScene::~GameScene()
@@ -26,9 +28,15 @@ bool GameScene::init()
 {
 	if (!Layer::init()) { return false; }
 
+	//背景音乐
+	SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.3f);
+	SimpleAudioEngine::getInstance()->playBackgroundMusic("game_music.mp3", true);
+
+	/*
 	//====导入plist====
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("shoot_background.plist");  
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("shoot.plist");
+	*/
 
 	//====对象创建====
 
@@ -111,16 +119,12 @@ bool GameScene::init()
 	lbl_bomb->setColor(Color3B::BLACK);
 	lbl_bomb->setVisible(false);
 
+	//敌机等级叠加速度初始化
+	Enemy::clearSpeedIncrement();
+
 	//====hero动画====
 	auto animation = Animation::create();  //飞机动画
-	
-	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("hero1.png"));  //动画帧
-	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("hero2.png"));
-	
-	animation->setDelayPerUnit(PLANE_INTERVAL_DELAY);  //切换时间
-	
-	animation->setLoops(REPEAT_FOREVER);  //循环次数:无限
-	
+	animation = AnimationCache::getInstance()->getAnimation("hero_fly");
 	auto animate = Animate::create(animation);  //动画对象->动作对象
 	hero->runAction(animate);
 	
@@ -130,8 +134,7 @@ bool GameScene::init()
 	
 	listener->onTouchBegan = [=](Touch* touch, Event*)
 	{
-		log("=====Began=====");
-		
+		//log("=====Began=====");
 		if (Director::getInstance()->isPaused()) { return false; }  //游戏暂停状态就不处理
 
 		auto touchPos = touch->getLocation();
@@ -140,7 +143,7 @@ bool GameScene::init()
 		{
 			m_correctVector = hero->getPosition() - touchPos;
 		}
-		return isControl;
+		return isControl && m_canMove;
 	};
 
 	//限定移动范围
@@ -151,45 +154,32 @@ bool GameScene::init()
 
 	listener->onTouchMoved = [=](Touch* touch, Event*)
 	{
-		log("=====Move====");
+		//log("=====Move====");
 		auto touchPos = touch->getLocation() + m_correctVector;
 		hero->setPosition(MAX(minX, MIN(touchPos.x, maxX)), MAX(minY, MIN(touchPos.y, maxY)));
 	};
 
 	listener->onTouchEnded = [](Touch*, Event*)
 	{
-		log("=====End=====");
+		//log("=====End=====");
 	};
 	
-	this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, hero);
+	hero->getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, hero);
 
 	//====对象更新====
 
 	//子弹
-	this->schedule(schedule_selector(GameScene::createBullet), BULLET_INTERVAL_DELAY); 
+	schedule(schedule_selector(GameScene::createBullet), BULLET_INTERVAL_DELAY); 
 	
 	//敌机
-	this->schedule(schedule_selector(GameScene::createSmallEnemmy), SMALL_ENEMY_INTERVAL_DELAY, REPEAT_FOREVER, SMALL_ENEMY_APPEAR_DELAY);  
-	this->schedule(schedule_selector(GameScene::createBigEnemy), MIDDLE_ENEMY_INTERVAL_DELAY, REPEAT_FOREVER, MIDDLE_ENEMY_APPEAR_DELAY);
-	this->schedule(schedule_selector(GameScene::createBossEnemy), BIG_ENEMY_INTERVAL_DELAY, REPEAT_FOREVER, BIG_ENEMY_APPEAR_DELAY);
-	this->schedule(schedule_selector(GameScene::createItems),ITEM_INTERVAL_DELAY, REPEAT_FOREVER, ITEM_APPEAR_DELAY);
+	schedule(schedule_selector(GameScene::createSmallEnemmy), SMALL_ENEMY_INTERVAL_DELAY, REPEAT_FOREVER, SMALL_ENEMY_APPEAR_DELAY);  
+	schedule(schedule_selector(GameScene::createMiddleEnemy), MIDDLE_ENEMY_INTERVAL_DELAY, REPEAT_FOREVER, MIDDLE_ENEMY_APPEAR_DELAY);
+	schedule(schedule_selector(GameScene::createBigEnemy), BIG_ENEMY_INTERVAL_DELAY, REPEAT_FOREVER, BIG_ENEMY_APPEAR_DELAY);
+	schedule(schedule_selector(GameScene::createItems),ITEM_INTERVAL_DELAY, REPEAT_FOREVER, ITEM_APPEAR_DELAY);
 
-	this->scheduleUpdate();  //updata图像
+	scheduleUpdate();  //updata图像
     
     return true;
-}
-
-void GameScene::pauseAndResume(Ref* ref)
-{
-	auto toggle = (MenuItemToggle*)ref;  //通过Toggle菜单项的SelectedIndex可以判断现在切换到第几项
-	if (toggle->getSelectedIndex() == 0)
-	{
-		Director::getInstance()->resume();
-	} 
-	else
-	{
-		Director::getInstance()->pause();
-	}
 }
 
 void GameScene::update(float data)
@@ -207,9 +197,9 @@ void GameScene::update(float data)
 	{
 		bg->setPositionY(0);
 	}
-	
-	//==迭代器==
+
 	/*
+	//==迭代器==
 	vector<Bullet*>::iterator it_bullet;
 	vector<Enemy*>::iterator it_enemy;
 	vector<Item*>::iterator it_item;
@@ -287,7 +277,7 @@ void GameScene::update(float data)
 	}
 	*/
 
-	//====子弹与敌机碰撞====
+	//====敌机碰撞====
 	/*
 	for (it_enemy = m_vEnemies.begin(); it_enemy != m_vEnemies.end(); it_enemy++)
 	{
@@ -341,6 +331,7 @@ void GameScene::update(float data)
 	*/
 	for (auto enemy : m_vEnemies)
 	{
+		//敌机与子弹碰撞
 		for (auto bullet : m_vBullets)
 		{
 			if (enemy->getBoundingBox().intersectsRect(bullet->getBoundingBox()))
@@ -348,12 +339,12 @@ void GameScene::update(float data)
 				removeableBullets.push_back(bullet);
 				this->removeChild(bullet);
 
-				enemy->hit();
+				enemy->hitAM();
 				enemy->loseHP(bullet->getATK());
 
 				if (enemy->isDestroy())
 				{
-					enemy->destroy();
+					enemy->destroyAM();
 					m_totalScore += enemy->getScore();
 					auto str_score = StringUtils::format("%d", m_totalScore);
 					lbl_score->setString(str_score);
@@ -362,6 +353,40 @@ void GameScene::update(float data)
 					//this->removeChild(enemy);
 				}
 			}
+		}
+		//敌机与英雄碰撞
+		if (m_planeActive && enemy->getBoundingBox().intersectsRect(hero->getBoundingBox()))
+		{
+			//不再参与碰撞检测，若仍有血量进入“闪烁”的不受攻击状态，否则死亡
+			m_planeActive = false;
+
+			m_canMove = false;
+
+			enemy->hitAM();
+			enemy->loseHP(HERO_HIT_ATTACK);
+
+			if (enemy->isDestroy())
+			{
+				enemy->destroyAM();
+				removeableEnemies.push_back(enemy);
+			}
+
+			auto animation = Animation::create();
+			for (int i = 0; i < 4; i++)
+			{
+				auto png_file = StringUtils::format("hero_blowup_n%d.png", i + 1);
+				auto sprite_frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(png_file);
+				animation->addSpriteFrame(sprite_frame);
+			}
+			animation->setDelayPerUnit(HERO_DESTROY_DELAY);
+			auto animate = Animate::create(animation);
+			auto CallFunc = CallFunc::create([=]()
+			{
+				auto scene = GameOverScene::createScene(m_totalScore);
+				Director::getInstance()->replaceScene(scene);
+			});
+			hero->stopAllActions();
+			hero->runAction(Sequence::create(animate, CallFunc, NULL));
 		}
 	}
 
@@ -404,39 +429,44 @@ void GameScene::update(float data)
 		}
 	}
 	*/
-	vector<Item*> removeableItems;
-	for (auto item : m_vItems)
+	if (m_planeActive)
 	{
-		if (item->getBoundingBox().intersectsRect(hero->getBoundingBox()))
+		vector<Item*> removeableItems;
+		for (auto item : m_vItems)
 		{
-			removeableItems.push_back(item);
-			this->removeChild(item);
-
-			switch (item->getType())
+			if (item->getBoundingBox().intersectsRect(hero->getBoundingBox()))
 			{
-			case BulletLevelUp:
-				m_isDoubleBullet = true;
-				m_doubleBulletNumber = DOUBLE_BULLETS_NUMBER;
-				break;
-			case Bomb:
-				if (m_bombCount < MAX_BOMB_NUM)
+				removeableItems.push_back(item);
+				this->removeChild(item);
+
+				switch (item->getType())
 				{
-					m_bombCount++;
+				case BulletLevelUp:
+					SimpleAudioEngine::getInstance()->playEffect("get_double_laser.mp3");
+					m_isDoubleBullet = true;
+					m_doubleBulletNumber = DOUBLE_BULLETS_NUMBER;
+					break;
+				case Bomb:
+					SimpleAudioEngine::getInstance()->playEffect("get_bomb.mp3");
+					if (m_bombCount < MAX_BOMB_NUM)
+					{
+						m_bombCount++;
+					}
+					updateBombCount();
+					break;
+				default:
+					break;
 				}
-				updateBombCount();
-				break;
-			default:
-				break;
 			}
 		}
+		for (auto item : removeableItems)
+		{
+			m_vItems.eraseObject(item);
+		}
+		removeableItems.clear();
+		removeableItems.shrink_to_fit();
 	}
 	
-	for (auto item : removeableItems)
-	{
-		m_vItems.eraseObject(item);
-	}
-	removeableItems.clear();
-	removeableItems.shrink_to_fit();
 
 	for (auto bullet : removeableBullets)
 	{
@@ -455,9 +485,10 @@ void GameScene::update(float data)
 
 void GameScene::createBullet(float)
 {
+	SimpleAudioEngine::getInstance()->playEffect("bullet.mp3");
 	auto hero = this->getChildByTag(HERO_TAG);
 
-	if (this->m_isDoubleBullet)  //双重子弹
+	if (m_isDoubleBullet)  //双重子弹
 	{
 		//左侧子弹
 		auto leftBullet = Bullet::create(Twofold);
@@ -471,7 +502,7 @@ void GameScene::createBullet(float)
 		this->addChild(rightBullet, BULLET_LAYER);
 		m_vBullets.pushBack(rightBullet);
 
-		this->m_doubleBulletNumber--;
+		m_doubleBulletNumber--;
 
 		if (this->m_doubleBulletNumber <= 0)
 		{
@@ -480,10 +511,10 @@ void GameScene::createBullet(float)
 	}
 	else  //单重子弹
 	{
-		auto Bullet = Bullet::create(Onefold);
-		Bullet->setPosition(hero->getPosition() + Point(0, hero->getContentSize().height / 2 + 10));
-		this->addChild(Bullet, BULLET_LAYER);
-		m_vBullets.pushBack(Bullet);
+		auto bullet = Bullet::create(Onefold);
+		bullet->setPosition(hero->getPosition() + Point(0, hero->getContentSize().height / 2 + 10));
+		this->addChild(bullet, BULLET_LAYER);
+		m_vBullets.pushBack(bullet);
 	}
 }
 
@@ -504,18 +535,19 @@ void GameScene::createSmallEnemmy(float)
 	this->createEnemy(Small);
 }
 
-void GameScene::createBigEnemy(float)
+void GameScene::createMiddleEnemy(float)
 {
 	this->createEnemy(Middle);
 }
 
-void GameScene::createBossEnemy(float)
+void GameScene::createBigEnemy(float)
 {
 	this->createEnemy(Big);
 }
 
 void GameScene::createItems(float)
 {
+	SimpleAudioEngine::getInstance()->playEffect("out_porp.mp3");
 	//创建道具
 	int itemType = rand() % 2;
 	Item* item;
@@ -562,10 +594,12 @@ void GameScene::bomb(Ref*)
 		return;
 	}
 
+	SimpleAudioEngine::getInstance()->playEffect("use_bomb.mp3");
+	auto lbl_score = (Label*)this->getChildByTag(LABEL_SCORE_TAG);
+
 	m_bombCount--;
 	updateBombCount();
 
-	auto lbl_score = (Label*)this->getChildByTag(LABEL_SCORE_TAG);
 	/*
 	for (it_enemy = m_vEnemies.begin(); it_enemy != m_vEnemies.end(); it_enemy++)
 	{
@@ -586,7 +620,7 @@ void GameScene::bomb(Ref*)
 	for (auto enemy : m_vEnemies)
 	{
 		enemy->loseHP(BOMB_ATTACK);
-		enemy->destroy();
+		enemy->destroyAM();
 		if (enemy->isDestroy())
 		{
 			m_totalScore += enemy->getScore();
@@ -627,5 +661,24 @@ void GameScene::updateBombCount()
 		menu_item_bomb->setVisible(true);
 		lbl_bomb->setVisible(true);
 		lbl_bomb->setString(StringUtils::format("X%d", this->m_bombCount));
+	}
+}
+
+void GameScene::pauseAndResume(Ref* ref)
+{
+	auto toggle = (MenuItemToggle*)ref;  //通过Toggle菜单项的SelectedIndex可以判断现在切换到第几项
+	if (toggle->getSelectedIndex() == 0)
+	{
+		SimpleAudioEngine::getInstance()->playEffect("button.mp3");
+		m_canMove = true;
+		SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+		Director::getInstance()->resume();
+	} 
+	else
+	{
+		SimpleAudioEngine::getInstance()->playEffect("button.mp3");
+		m_canMove = false;
+		SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+		Director::getInstance()->pause();
 	}
 }

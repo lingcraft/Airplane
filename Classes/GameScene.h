@@ -1,9 +1,10 @@
 #pragma once
 
-#include "cocos2d.h"
 #include "Enemy.h"
 #include "Bullet.h"
 #include "Item.h"
+#include "GameOverScene.h"
+#include "WelcomeScene.h"
 
 USING_NS_CC;
 using namespace std;
@@ -22,8 +23,8 @@ public:
 
 	void createBullet(float);
 	void createSmallEnemmy(float);
+	void createMiddleEnemy(float);
 	void createBigEnemy(float);
-	void createBossEnemy(float);
 	void createEnemy(EnemyType);
 	void createItems(float);
 	void updateBombCount();
@@ -38,5 +39,6 @@ private:
 	bool m_isDoubleBullet;
 	int m_doubleBulletNumber;
 	int m_bombCount;
-
+	bool m_canMove;
+	bool m_planeActive;
 };

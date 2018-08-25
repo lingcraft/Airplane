@@ -35,18 +35,18 @@
 #define SMALL_ENEMY_SPEED			4
 #define MIDDLE_ENEMY_SPEED			2
 #define BIG_ENEMY_SPEED				0.5f
+#define	SPEED_INCREMENT				0.2f
 
 //血量
 #define SMALL_ENEMY_HP				1
 #define MIDDLE_ENEMY_HP				10
 #define BIG_ENEMY_HP				40
 
-//子弹
+//攻击力
 #define	BULLET1_ATTACK				1
 #define BULLET2_ATTACK				2
-#define DOUBLE_BULLETS_NUMBER		20
-
 #define BOMB_ATTACK					100
+#define HERO_HIT_ATTACK				50
 
 //延迟单位：秒
 #define PLANE_INTERVAL_DELAY		0.2f
@@ -54,14 +54,25 @@
 #define SMALL_ENEMY_INTERVAL_DELAY	0.8f
 #define MIDDLE_ENEMY_INTERVAL_DELAY	10
 #define BIG_ENEMY_INTERVAL_DELAY	20
-#define ITEM_INTERVAL_DELAY			16
+#define ITEM_INTERVAL_DELAY			15
 #define SMALL_ENEMY_APPEAR_DELAY	2
 #define MIDDLE_ENEMY_APPEAR_DELAY	8
 #define BIG_ENEMY_APPEAR_DELAY		12
-#define ITEM_APPEAR_DELAY			14
+#define ITEM_APPEAR_DELAY			15
 #define ENEMY_HIT_DELAY				0.2f
-#define ENEMY_DESTROY_DELAY			0.1f
 #define BIG_ENEMY_FLY_DELAY			0.2f
+#define LOADING_PAGE_DELAY			0.2f
+#define HERO_DESTROY_DELAY			0.1f
+#define ENEMY_DESTROY_DELAY			0.1f
 
+//其他
+#define DOUBLE_BULLETS_NUMBER		20
 #define REPEAT_FOREVER				-1
 #define visSize Director::getInstance()->getVisibleSize()
+
+//基础库
+#include "cocos2d.h"
+#include "SimpleAudioEngine.h"
+USING_NS_CC;
+using namespace std;
+using namespace CocosDenshion;

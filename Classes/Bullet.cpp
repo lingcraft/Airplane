@@ -31,20 +31,18 @@ bool Bullet::init(BulletType type)
 		Sprite::initWithSpriteFrameName("bullet1.png");
 		b_attack = BULLET1_ATTACK;
 		b_speed = BULLETS_SPEED;
-		return true;
 		break;
 	case Twofold:
 	case Multifold:
 		Sprite::initWithSpriteFrameName("bullet2.png");
 		b_attack = BULLET2_ATTACK;
 		b_speed = BULLETS_SPEED;
-		return true;
 		break;
 	default:
 		break;
 	}
 
-	return false;
+	return true;
 }
 
 int Bullet::getATK()

@@ -1,10 +1,13 @@
 #include "Enemy.h"
 
+float Enemy::e_speedIncrement = 0;
+
 Enemy::Enemy()
 {
 	e_type = Small;
 	e_speed = 0;
 	e_hp = 0;
+	e_score = 0;
 }
 
 Enemy* Enemy::create(EnemyType type)
@@ -30,53 +33,44 @@ bool Enemy::init(EnemyType type)
 		Sprite::initWithSpriteFrameName("enemy1.png");
 		e_hp = SMALL_ENEMY_HP;
 		e_speed = SMALL_ENEMY_SPEED;
-
-		return true;
+		e_score = DESTROY_SAMLL_SCORE;
 		break;
 	case Middle:
 		Sprite::initWithSpriteFrameName("enemy2.png");
 		e_hp = MIDDLE_ENEMY_HP;
 		e_speed = MIDDLE_ENEMY_SPEED;
-
-		return true;
+		e_score = DESTROY_MIDDLE_SCORE;
 		break;
 	case Big:
 		{
 			Sprite::initWithSpriteFrameName("enemy3_n1.png");
 			e_hp = BIG_ENEMY_HP;
 			e_speed = BIG_ENEMY_SPEED;
-
+			e_score = DESTROY_BIG_SCORE;
 			//大飞机飞行动画
 			auto flyAnimation = Animation::create();
-			flyAnimation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_n1.png"));			
-			flyAnimation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_n2.png"));
-			flyAnimation->setDelayPerUnit(BIG_ENEMY_FLY_DELAY);
-			flyAnimation->setLoops(REPEAT_FOREVER);
+			flyAnimation = AnimationCache::getInstance()->getAnimation("big_enemy_fly");
 			auto flyAnimate = Animate::create(flyAnimation);
 			this->runAction(flyAnimate);
 		}
-		return true;
 		break;
 	default:
 		break;
 	}
 
-	return false;
+	return true;
 }
 
-void Enemy::hit()
+void Enemy::hitAM()
 {
 	auto animation = Animation::create();
-
 	switch (e_type)
 	{
 	case Middle:
-		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy2_hit.png"));
-		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy2.png"));
+		animation = AnimationCache::getInstance()->getAnimation("middle_enemy_hit");
 		break;
 	case Big:
-		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_hit.png"));
-		animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_n1.png"));
+		animation = AnimationCache::getInstance()->getAnimation("big_enemy_hit");
 		break;
 	default:
 		break;
@@ -86,31 +80,22 @@ void Enemy::hit()
 	this->runAction(animate);
 }
 
-void Enemy::destroy()
+void Enemy::destroyAM()
 {
 	auto animation = Animation::create();
 	switch (e_type)
 	{
 	case Small:
-		for (int i = 0; i < 4; i++)
-		{
-			auto png = StringUtils::format("enemy1_down%d.png", i + 1);
-			animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(png));
-		}
+		SimpleAudioEngine::getInstance()->playEffect("enemy1_down.mp3");
+		animation = AnimationCache::getInstance()->getAnimation("small_enemy_destroy");
 		break;
 	case Middle:
-		for (int i = 0; i < 4; i++)
-		{
-			auto png = StringUtils::format("enemy2_down%d.png", i + 1);
-			animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(png));
-		}
+		SimpleAudioEngine::getInstance()->playEffect("enemy2_down.mp3");
+		animation = AnimationCache::getInstance()->getAnimation("middle_enemy_destroy");
 		break;
 	case Big:
-		for (int i = 0; i < 4; i++)
-		{
-			auto png = StringUtils::format("enemy3_down%d.png", i + 1);
-			animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName(png));
-		}
+		SimpleAudioEngine::getInstance()->playEffect("enemy3_down.mp3");
+		animation = AnimationCache::getInstance()->getAnimation("big_enemy_destroy");
 		break;
 	default:
 		break;
@@ -125,6 +110,7 @@ void Enemy::destroy()
 	
 	if (isDestroy())
 	{
+		this->stopAllActions();
 		this->runAction(Sequence::create(animate, callFunc, NULL));
 	}
 	else
@@ -135,21 +121,7 @@ void Enemy::destroy()
 
 int Enemy::getScore()
 {
-	switch (this->e_type)
-	{
-	case Small:
-		return DESTROY_SAMLL_SCORE;
-		break;
-	case Middle:
-		return DESTROY_MIDDLE_SCORE;
-		break;
-	case Big:
-		return DESTROY_BIG_SCORE;
-		break;
-	default:
-		return 0;
-		break;
-	}
+	return e_score;
 }
 
 bool Enemy::isDestroy()
@@ -174,12 +146,26 @@ void Enemy::loseHP(int loss)
 	}
 }
 
-float Enemy::getSpeed()
-{
-	return e_speed;
-}
-
 void Enemy::setHP(int hp)
 {
 	e_hp = hp;
+}
+
+void Enemy::speedUp()
+{
+	if (Enemy::e_speedIncrement >= 10)
+	{
+		return;
+	}
+	Enemy::e_speedIncrement += SPEED_INCREMENT;
+}
+
+float Enemy::getSpeed()
+{
+	return e_speed + e_speedIncrement;
+}
+
+void Enemy::clearSpeedIncrement()
+{
+	Enemy::e_speedIncrement = 0;
 }
