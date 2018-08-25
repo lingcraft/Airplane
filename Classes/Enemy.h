@@ -2,6 +2,7 @@
 
 #include "cocos2d.h"
 #include "Definitions.h"
+
 USING_NS_CC;
 using namespace std;
 
@@ -23,7 +24,8 @@ public:
 	int getScore();			//¼ßÃðµÃ·Ö
 	bool isDestroy();
 	int getHP();
-	void loseHP(int loss);
+	void loseHP(int);
+	void setHP(int);
 	float getSpeed();
 
 private:

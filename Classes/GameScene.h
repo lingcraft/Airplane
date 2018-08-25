@@ -3,6 +3,8 @@
 #include "cocos2d.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "Item.h"
+
 USING_NS_CC;
 using namespace std;
 
@@ -16,6 +18,7 @@ public:
 	virtual bool init();
 	void update(float);
 	void pauseAndResume(Ref*);
+	void bomb(Ref*);
 
 	void createBullet(float);
 	void createSmallEnemmy(float);
@@ -23,14 +26,17 @@ public:
 	void createBossEnemy(float);
 	void createEnemy(EnemyType);
 	void createItems(float);
+	void updateBombCount();
 
 private:
+
 	Point m_correctVector;
-	vector<Bullet*> m_vBullets;
-	vector<Enemy*> m_vEnemies;
-	vector<Sprite*> m_vItems;
+	Vector<Bullet*> m_vBullets;
+	Vector<Enemy*> m_vEnemies;
+	Vector<Item*> m_vItems;
 	int m_totalScore;
 	bool m_isDoubleBullet;
 	int m_doubleBulletNumber;
+	int m_bombCount;
 
 };
