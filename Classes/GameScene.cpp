@@ -29,7 +29,7 @@ bool GameScene::init()
 	if (!Layer::init()) { return false; }
 
 	//背景音乐
-	SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.3f);
+	SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(0.3f);  //音量大小
 	SimpleAudioEngine::getInstance()->playBackgroundMusic("game_music.mp3", true);
 
 	/*
@@ -349,6 +349,8 @@ void GameScene::update(float data)
 					auto str_score = StringUtils::format("%d", m_totalScore);
 					lbl_score->setString(str_score);
 
+					Enemy::updateSpeedLevel(m_totalScore);
+
 					removeableEnemies.push_back(enemy);
 					//this->removeChild(enemy);
 				}
@@ -372,14 +374,9 @@ void GameScene::update(float data)
 			}
 
 			auto animation = Animation::create();
-			for (int i = 0; i < 4; i++)
-			{
-				auto png_file = StringUtils::format("hero_blowup_n%d.png", i + 1);
-				auto sprite_frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(png_file);
-				animation->addSpriteFrame(sprite_frame);
-			}
-			animation->setDelayPerUnit(HERO_DESTROY_DELAY);
+			animation = AnimationCache::getInstance()->getAnimation("hero_destroy");
 			auto animate = Animate::create(animation);
+
 			auto CallFunc = CallFunc::create([=]()
 			{
 				auto scene = GameOverScene::createScene(m_totalScore);
@@ -463,8 +460,8 @@ void GameScene::update(float data)
 		{
 			m_vItems.eraseObject(item);
 		}
-		removeableItems.clear();
-		removeableItems.shrink_to_fit();
+		removeableItems.clear();			//清除对象
+		removeableItems.shrink_to_fit();	//释放内存
 	}
 	
 
@@ -627,6 +624,8 @@ void GameScene::bomb(Ref*)
 			auto str_score = StringUtils::format("%d", m_totalScore);
 			lbl_score->setString(str_score);
 
+			Enemy::updateSpeedLevel(m_totalScore);
+
 			removeableEnemies.push_back(enemy);
 			//this->removeChild(enemy);
 		}
@@ -672,6 +671,7 @@ void GameScene::pauseAndResume(Ref* ref)
 		SimpleAudioEngine::getInstance()->playEffect("button.mp3");
 		m_canMove = true;
 		SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+		SimpleAudioEngine::getInstance()->resumeAllEffects();
 		Director::getInstance()->resume();
 	} 
 	else
@@ -679,6 +679,7 @@ void GameScene::pauseAndResume(Ref* ref)
 		SimpleAudioEngine::getInstance()->playEffect("button.mp3");
 		m_canMove = false;
 		SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+		SimpleAudioEngine::getInstance()->pauseAllEffects();
 		Director::getInstance()->pause();
 	}
 }

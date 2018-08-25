@@ -1,6 +1,6 @@
 #include "Enemy.h"
 
-float Enemy::e_speedIncrement = 0;
+int Enemy::e_speedLevel = 0;
 
 Enemy::Enemy()
 {
@@ -8,6 +8,16 @@ Enemy::Enemy()
 	e_speed = 0;
 	e_hp = 0;
 	e_score = 0;
+	e_idSoundBigFlying = 0;
+}
+
+Enemy::~Enemy()
+{
+	//对象被析构（被子弹、炸弹摧毁以及超出屏幕）后停止大飞机飞行音乐
+	if (e_type == Big)
+	{
+		SimpleAudioEngine::getInstance()->stopEffect(e_idSoundBigFlying);
+	}
 }
 
 Enemy* Enemy::create(EnemyType type)
@@ -47,6 +57,8 @@ bool Enemy::init(EnemyType type)
 			e_hp = BIG_ENEMY_HP;
 			e_speed = BIG_ENEMY_SPEED;
 			e_score = DESTROY_BIG_SCORE;
+			//大飞机飞行音乐
+			e_idSoundBigFlying = SimpleAudioEngine::getInstance()->playEffect("big_spaceship_flying.mp3", true);
 			//大飞机飞行动画
 			auto flyAnimation = Animation::create();
 			flyAnimation = AnimationCache::getInstance()->getAnimation("big_enemy_fly");
@@ -110,6 +122,8 @@ void Enemy::destroyAM()
 	
 	if (isDestroy())
 	{
+		//直接在析构函数中停止大飞机飞行音乐即可
+		//SimpleAudioEngine::getInstance()->stopEffect(e_idSoundBigFlying);
 		this->stopAllActions();
 		this->runAction(Sequence::create(animate, callFunc, NULL));
 	}
@@ -151,21 +165,18 @@ void Enemy::setHP(int hp)
 	e_hp = hp;
 }
 
-void Enemy::speedUp()
-{
-	if (Enemy::e_speedIncrement >= 10)
-	{
-		return;
-	}
-	Enemy::e_speedIncrement += SPEED_INCREMENT;
-}
-
 float Enemy::getSpeed()
 {
-	return e_speed + e_speedIncrement;
+	return e_speed + e_speedLevel * SPEED_INCREMENT;
 }
 
 void Enemy::clearSpeedIncrement()
 {
-	Enemy::e_speedIncrement = 0;
+	Enemy::e_speedLevel = 0;
+}
+
+void Enemy::updateSpeedLevel(int score)
+{
+	e_speedLevel = ((e_speedLevel < score / SPEED_LEVELUP_SCORE) && e_speedLevel < MAX_SPEED_LEVEL)?
+		score / SPEED_LEVELUP_SCORE : e_speedLevel;
 }

@@ -52,7 +52,7 @@ bool GameOverScene::init(int score)
 		SimpleAudioEngine::getInstance()->playEffect("achievement.mp3");
 
 		high_score = score;
-		UserDefault::getInstance()->setStringForKey("HIGHSCORE", to_string(high_score));
+		UserDefault::getInstance()->setStringForKey("HIGHSCORE", StringUtils::format("%d", high_score));
 
 		lbl_high_score->setString(StringUtils::format("%d", high_score));
 
@@ -63,11 +63,29 @@ bool GameOverScene::init(int score)
 
 	//ÖØÐÂÓÎÏ·
 	auto back = Sprite::createWithSpriteFrameName("btn_finish.png");
-	auto menu_item_back = MenuItemSprite::create(back, back, [](Ref*)
+	auto menu_item_back = MenuItemSprite::create(back, back, [=](Ref*)
 	{	
 		SimpleAudioEngine::getInstance()->playEffect("button.mp3");
-		auto scene = GameScene::createScene();
-		Director::getInstance()->replaceScene(scene);
+
+		auto bg = Sprite::createWithSpriteFrameName("background.png");
+		bg->setAnchorPoint(Point::ANCHOR_BOTTOM_LEFT);
+		this->addChild(bg);
+
+		auto loading = Sprite::createWithSpriteFrameName("game_loading4.png");
+		loading->setPosition(visSize.width - 115, 40);
+		this->addChild(loading);
+
+		auto animation = AnimationCache::getInstance()->getAnimation("loading");
+
+		auto animate = Animate::create(animation);
+		auto callFunc = CallFunc::create([=]()
+		{
+
+			auto scene = GameScene::createScene();
+			Director::getInstance()->replaceScene(scene);
+		});
+		loading->runAction(Sequence::create(animate, callFunc, NULL));
+
 	});
 
 	float x = visSize.width - back->getContentSize().width / 2 - 20;

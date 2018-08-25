@@ -18,6 +18,7 @@ bool WelcomeScene::init()
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("shoot.plist");
 
 	//====爆炸动画====
+	//小敌机
 	auto animation = Animation::create();
 	for (int i = 0; i < 4; i++)
 	{
@@ -26,9 +27,8 @@ bool WelcomeScene::init()
 		animation->addSpriteFrame(sprite_frame);
 	}
 	animation->setDelayPerUnit(ENEMY_DESTROY_DELAY);
-	//缓存起来
-	AnimationCache::getInstance()->addAnimation(animation, "small_enemy_destroy");
-
+	AnimationCache::getInstance()->addAnimation(animation, "small_enemy_destroy");  //缓存起来
+	//中敌机
 	animation = Animation::create();
 	for (int i = 0; i < 4 ; i++)
 	{
@@ -38,7 +38,7 @@ bool WelcomeScene::init()
 	}
 	animation->setDelayPerUnit(ENEMY_DESTROY_DELAY);
 	AnimationCache::getInstance()->addAnimation(animation, "middle_enemy_destroy");
-
+	//大敌机
 	animation = Animation::create();
 	for (int i = 0; i < 6 ; i++)
 	{
@@ -48,16 +48,25 @@ bool WelcomeScene::init()
 	}
 	animation->setDelayPerUnit(ENEMY_DESTROY_DELAY);
 	AnimationCache::getInstance()->addAnimation(animation, "big_enemy_destroy");
+	//英雄
+	animation = Animation::create();
+	for (int i = 0; i < 4; i++)
+	{
+		auto png_file = StringUtils::format("hero_blowup_n%d.png", i + 1);
+		auto sprite_frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(png_file);
+		animation->addSpriteFrame(sprite_frame);
+	}
+	animation->setDelayPerUnit(HERO_DESTROY_DELAY);
+	AnimationCache::getInstance()->addAnimation(animation, "hero_destroy");
 
 	//====受伤动画====
+	//中敌机
 	animation = Animation::create();
-
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy2_hit.png"));
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy2.png"));
-	
 	animation->setDelayPerUnit(0.2f);
 	AnimationCache::getInstance()->addAnimation(animation, "middle_enemy_hit");
-
+	//大敌机
 	animation = Animation::create();
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_hit.png"));
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_n1.png"));
@@ -65,21 +74,17 @@ bool WelcomeScene::init()
 	AnimationCache::getInstance()->addAnimation(animation, "big_enemy_hit");
 
 	//====飞行动画====
-	//hero
+	//英雄
 	animation = Animation::create();
-
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("hero1.png"));
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("hero2.png"));
-
 	animation->setDelayPerUnit(PLANE_INTERVAL_DELAY);  //切换时间
 	animation->setLoops(REPEAT_FOREVER);  //循环次数:无限
 	AnimationCache::getInstance()->addAnimation(animation, "hero_fly");
-	//big_enemy
+	//大敌机
 	animation = Animation::create();
-
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_n1.png"));
 	animation->addSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("enemy3_n2.png"));
-
 	animation->setDelayPerUnit(BIG_ENEMY_FLY_DELAY);  //切换时间
 	animation->setLoops(REPEAT_FOREVER);  //循环次数:无限
 	AnimationCache::getInstance()->addAnimation(animation, "big_enemy_fly");
@@ -121,8 +126,9 @@ bool WelcomeScene::init()
 		auto sprite_frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(png_file);
 		animation->addSpriteFrame(sprite_frame);
 	}
-	animation->setDelayPerUnit(LOADING_PAGE_DELAY);
+	animation->setDelayPerUnit(LOADING_DELAY);
 	animation->setLoops(2);
+	AnimationCache::getInstance()->addAnimation(animation, "loading");
 
 	auto animate = Animate::create(animation);
 	auto callFunc = CallFunc::create([]()

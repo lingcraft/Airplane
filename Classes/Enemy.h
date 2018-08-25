@@ -13,6 +13,7 @@ class Enemy : public Sprite
 {
 public:
 	Enemy();
+	~Enemy();
 	static Enemy* create(EnemyType);
 	bool init(EnemyType);
 	void hitAM();				// ‹…À∂Øª≠
@@ -23,7 +24,7 @@ public:
 	void loseHP(int);
 	void setHP(int);
 	float getSpeed();
-	static void speedUp();
+	static void updateSpeedLevel(int);
 	static void clearSpeedIncrement();
 
 private:
@@ -31,5 +32,6 @@ private:
 	float e_speed;
 	int e_hp;
 	int e_score;
-	static float e_speedIncrement;
+	int e_idSoundBigFlying;
+	static int e_speedLevel;
 };

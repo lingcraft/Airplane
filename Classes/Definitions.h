@@ -21,13 +21,15 @@
 #define SCORE_LAYER					4
 #define UI_LAYER					10
 
-//得分
+//分数
 #define DESTROY_SAMLL_SCORE			10
 #define DESTROY_MIDDLE_SCORE		50
 #define DESTROY_BIG_SCORE			100
+#define SPEED_LEVELUP_SCORE			500
 
 //上限
 #define MAX_BOMB_NUM				10
+#define MAX_SPEED_LEVEL				10
 
 //速度单位：像素
 #define BG_SPEED					1
@@ -61,7 +63,7 @@
 #define ITEM_APPEAR_DELAY			15
 #define ENEMY_HIT_DELAY				0.2f
 #define BIG_ENEMY_FLY_DELAY			0.2f
-#define LOADING_PAGE_DELAY			0.2f
+#define LOADING_DELAY				0.2f
 #define HERO_DESTROY_DELAY			0.1f
 #define ENEMY_DESTROY_DELAY			0.1f
 
