@@ -177,6 +177,5 @@ void Enemy::clearSpeedIncrement()
 
 void Enemy::updateSpeedLevel(int score)
 {
-	e_speedLevel = ((e_speedLevel < score / SPEED_LEVELUP_SCORE) && e_speedLevel < MAX_SPEED_LEVEL)?
-		score / SPEED_LEVELUP_SCORE : e_speedLevel;
+	e_speedLevel = ((e_speedLevel < score / SPEED_LEVELUP_SCORE) && e_speedLevel < MAX_SPEED_LEVEL) ? score / SPEED_LEVELUP_SCORE : e_speedLevel;
 }
