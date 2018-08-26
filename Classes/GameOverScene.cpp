@@ -52,7 +52,7 @@ bool GameOverScene::init(int score)
 		SimpleAudioEngine::getInstance()->playEffect("achievement.mp3");
 
 		high_score = score;
-		UserDefault::getInstance()->setStringForKey("HIGHSCORE", StringUtils::format("%d", high_score));
+		UserDefault::getInstance()->setIntegerForKey("HIGHSCORE", high_score);
 
 		lbl_high_score->setString(StringUtils::format("%d", high_score));
 

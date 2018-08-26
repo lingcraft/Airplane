@@ -193,7 +193,7 @@ void GameScene::update(float data)
 	bg->setPositionY(bg->getPositionY() - BG_SPEED);
 	bg_next->setPositionY(bg->getPositionY() + bg->getContentSize().height);
 
-	if (!bg_next->getPositionY())
+	if (bg_next->getPositionY() <= 0)
 	{
 		bg->setPositionY(0);
 	}
