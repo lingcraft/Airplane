@@ -21,7 +21,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
         director->setOpenGLView(glview);
     }
 
-	//glview->setFrameSize(480,640);  //设置窗口大小
+	glview->setFrameSize(480,640);  //设置窗口大小
 	glview->setDesignResolutionSize(480, 640, ResolutionPolicy::FIXED_WIDTH);  //适应屏幕
 
 	//资源路径

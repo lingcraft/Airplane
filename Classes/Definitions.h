@@ -47,7 +47,7 @@
 //¹¥»÷Á¦
 #define	BULLET1_ATTACK				1
 #define BULLET2_ATTACK				2
-#define BOMB_ATTACK					100
+#define BOMB_ATTACK					30
 #define HERO_HIT_ATTACK				50
 
 //ÑÓ³Ùµ¥Î»£ºÃë
@@ -60,7 +60,7 @@
 #define SMALL_ENEMY_APPEAR_DELAY	2
 #define MIDDLE_ENEMY_APPEAR_DELAY	8
 #define BIG_ENEMY_APPEAR_DELAY		12
-#define ITEM_APPEAR_DELAY			15
+#define ITEM_APPEAR_DELAY			14
 #define ENEMY_HIT_DELAY				0.2f
 #define BIG_ENEMY_FLY_DELAY			0.2f
 #define LOADING_DELAY				0.2f
